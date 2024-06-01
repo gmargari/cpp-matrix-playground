@@ -282,6 +282,8 @@ constexpr void compile_time_checks()
         static_assert(C.get_nrow() == 2);
         static_assert(C.get_ncol() == 10);
         static_assert(C.get_flops() == 20);
+
+        // constexpr Matrix C = Matrix(2, 10) + Matrix(3, 10);  // compile error: non-matching dimensions
     }
 
     {
@@ -292,6 +294,8 @@ constexpr void compile_time_checks()
         static_assert(C.get_nrow() == 2);
         static_assert(C.get_ncol() == 10);
         static_assert(C.get_flops() == 190);
+
+        // constexpr Matrix C = Matrix(2, 5) * Matrix(4, 10);  // compile error: non-matching dimensions
     }
 
     {
