@@ -22,9 +22,9 @@ public:
 private:
     constexpr Matrix(int nrow, int ncol, int flops);
 
-    const int nrow;
-    const int ncol;
-    const int flops;
+    const int m_nrow;
+    const int m_ncol;
+    const int m_flops;
 };
 
 //==============================================================================
@@ -47,9 +47,9 @@ static constexpr int calc_mat_mult_flops(const Matrix& A, const Matrix& B)
 // Matrix ()
 //==============================================================================
 constexpr Matrix::Matrix(int nrow, int ncol, int flops)
-    : nrow(nrow),
-      ncol(ncol),
-      flops(flops)
+    : m_nrow(nrow),
+      m_ncol(ncol),
+      m_flops(flops)
 {
 }
 
@@ -66,7 +66,7 @@ constexpr Matrix::Matrix(int nrow, int ncol)
 //==============================================================================
 constexpr int Matrix::get_nrow() const
 {
-    return nrow;
+    return m_nrow;
 }
 
 //==============================================================================
@@ -74,7 +74,7 @@ constexpr int Matrix::get_nrow() const
 //==============================================================================
 constexpr int Matrix::get_ncol() const
 {
-    return ncol;
+    return m_ncol;
 }
 
 //==============================================================================
@@ -82,7 +82,13 @@ constexpr int Matrix::get_ncol() const
 //==============================================================================
 constexpr int Matrix::get_flops() const
 {
-    return flops;
+    return m_flops;
+}
+
+std::string diff_dims_error(const Matrix& A, const Matrix& B)
+{
+    return std::string("A: ") + std::to_string(A.get_nrow()) + "x" + std::to_string(A.get_ncol()) +
+          ", B: " + std::to_string(B.get_nrow()) + "x" + std::to_string(B.get_ncol());
 }
 
 //==============================================================================
@@ -91,14 +97,14 @@ constexpr int Matrix::get_flops() const
 constexpr Matrix Matrix::operator+(const Matrix& other) const
 {
     // static_assert
-    if (nrow != other.nrow || this->ncol != other.ncol) {
-        throw std::logic_error(("dimensions do not match: this->ncol (" + std::to_string(this->ncol) + ") != other.nrow (" + std::to_string(other.nrow) + ")").c_str());
+    if (m_nrow != other.m_nrow || this->m_ncol != other.m_ncol) {
+        throw std::logic_error(("add: dimensions do not match: " + diff_dims_error(*this, other)).c_str());
     }
 
     return {
-        this->nrow,
-        this->ncol,
-        this->flops + other.flops + calc_mat_add_flops(*this, other)
+        this->m_nrow,
+        this->m_ncol,
+        this->m_flops + other.m_flops + calc_mat_add_flops(*this, other)
     };
 }
 
@@ -108,14 +114,14 @@ constexpr Matrix Matrix::operator+(const Matrix& other) const
 constexpr Matrix Matrix::operator*(const Matrix& other) const
 {
     // static_assert
-    if (this->ncol != other.nrow) {
-        throw std::logic_error(("dimensions do not match: this->ncol (" + std::to_string(this->ncol) + ") != other.nrow (" + std::to_string(other.nrow) + ")").c_str());
+    if (this->m_ncol != other.m_nrow) {
+        throw std::logic_error(("mult: dimensions do not match: " + diff_dims_error(*this, other)).c_str());
     }
 
     return {
-        this->nrow,
-        other.ncol,
-        this->flops + other.flops + calc_mat_mult_flops(*this, other)
+        this->m_nrow,
+        other.m_ncol,
+        this->m_flops + other.m_flops + calc_mat_mult_flops(*this, other)
     };
 }
 
