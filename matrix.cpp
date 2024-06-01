@@ -158,6 +158,23 @@ std::ostream& operator<<(std::ostream& os, const Matrix& mat)
 }
 
 //==============================================================================
+// calc_mult_flops ()
+//==============================================================================
+constexpr int calc_mult_flops(std::initializer_list<const Matrix> list)
+{
+    if (list.size() == 0) {
+        return 0;
+    }
+
+    Matrix res = *(list.begin());
+    for (auto it = list.begin() + 1; it != list.end(); it++) {
+        res *= *it;
+    }
+
+    return res.get_flops();
+}
+
+//==============================================================================
 // compile_time_checks ()
 //==============================================================================
 constexpr void compile_time_checks()
@@ -204,6 +221,15 @@ constexpr void compile_time_checks()
         static_assert(G.get_ncol() == 8);
         static_assert(G2.get_nrow() == 2);
         static_assert(G2.get_ncol() == 8);
+    }
+
+    {
+        constexpr Matrix A(2, 5);
+        constexpr Matrix B(5, 10);
+        constexpr Matrix C(10, 3);
+        constexpr Matrix D(3, 8);
+
+        static_assert((A * B * C * D).get_flops() == calc_mult_flops({A, B, C, D}));
     }
 }
 
