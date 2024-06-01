@@ -16,6 +16,8 @@ public:
 
     constexpr Matrix operator+(const Matrix& other) const;
     constexpr Matrix operator*(const Matrix& other) const;
+    Matrix& operator+=(const Matrix& other);
+    Matrix& operator*=(const Matrix& other);
 
     friend std::ostream& operator<<(std::ostream& os, const Matrix& mat);
 
@@ -126,6 +128,26 @@ constexpr Matrix Matrix::operator*(const Matrix& other) const
 }
 
 //==============================================================================
+// operator+= ()
+//==============================================================================
+Matrix& Matrix::operator+=(const Matrix& other)
+{
+    *this = this->operator+(other);
+
+    return *this;
+}
+
+//==============================================================================
+// operator*= ()
+//==============================================================================
+Matrix& Matrix::operator*=(const Matrix& other)
+{
+    *this = this->operator*(other);
+
+    return *this;
+}
+
+//==============================================================================
 // operator<< ()
 //==============================================================================
 std::ostream& operator<<(std::ostream& os, const Matrix& mat)
@@ -186,10 +208,61 @@ constexpr void compile_time_checks()
 }
 
 //==============================================================================
+// run_time_checks ()
+//==============================================================================
+void run_time_checks()
+{
+    {
+        Matrix A(2, 10);
+        Matrix B(2, 10);
+        A += B;
+
+        assert(A.get_nrow() == 2);
+        assert(A.get_ncol() == 10);
+        assert(A.get_flops() == 20);
+    }
+
+    {
+        Matrix A(2, 10);
+        Matrix B(2, 10);
+        Matrix C(2, 10);
+        C += A + B;
+
+        assert(C.get_nrow() == 2);
+        assert(C.get_ncol() == 10);
+        assert(C.get_flops() == 40);
+    }
+
+    {
+        Matrix A(2, 5);
+        Matrix B(5, 10);
+        A *= B;
+
+        assert(A.get_nrow() == 2);
+        assert(A.get_ncol() == 10);
+        assert(A.get_flops() == 190);
+    }
+
+    {
+        Matrix A(2, 5);
+        Matrix B(5, 10);
+        Matrix C(10, 2);
+        C *= A * B;
+
+        assert(C.get_nrow() == 10);
+        assert(C.get_ncol() == 10);
+        assert(C.get_flops() == 570);
+    }
+}
+
+//==============================================================================
 // main ()
 //==============================================================================
 int main()
 {
+    compile_time_checks();
+    run_time_checks();
+
     Matrix A(2, 5);
     Matrix B(5, 3);
     Matrix C(3, 10);
