@@ -22,9 +22,9 @@ public:
 private:
     constexpr Matrix(int nrow, int ncol, int flops);
 
-    const int m_nrow;
-    const int m_ncol;
-    const int m_flops;
+    int m_nrow;
+    int m_ncol;
+    int m_flops;
 };
 
 //==============================================================================
