@@ -330,18 +330,18 @@ constexpr void compile_time_checks()
 void run_time_checks()
 {
     {
-        Matrix A(2, 10);
+        constexpr Matrix A(2, 10);
         Matrix B(2, 10);
-        A += B;
+        B += A;
 
-        assert(A.get_nrow() == 2);
-        assert(A.get_ncol() == 10);
-        assert(A.get_flops() == 20);
+        assert(B.get_nrow() == 2);
+        assert(B.get_ncol() == 10);
+        assert(B.get_flops() == 20);
     }
 
     {
-        Matrix A(2, 10);
-        Matrix B(2, 10);
+        constexpr Matrix A(2, 10);
+        constexpr Matrix B(2, 10);
         Matrix C(2, 10);
         C += A + B;
 
@@ -351,18 +351,18 @@ void run_time_checks()
     }
 
     {
-        Matrix A(2, 5);
-        Matrix B(5, 10);
-        A *= B;
+        constexpr Matrix A(5, 10);
+        Matrix B(2, 5);
+        B *= A;
 
-        assert(A.get_nrow() == 2);
-        assert(A.get_ncol() == 10);
-        assert(A.get_flops() == 190);
+        assert(B.get_nrow() == 2);
+        assert(B.get_ncol() == 10);
+        assert(B.get_flops() == 190);
     }
 
     {
-        Matrix A(2, 5);
-        Matrix B(5, 10);
+        constexpr Matrix A(2, 5);
+        constexpr Matrix B(5, 10);
         Matrix C(10, 2);
         C *= A * B;
 
