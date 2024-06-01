@@ -87,6 +87,9 @@ constexpr int Matrix::get_flops() const
     return m_flops;
 }
 
+//==============================================================================
+// diff_dims_error ()
+//==============================================================================
 std::string diff_dims_error(const Matrix& A, const Matrix& B)
 {
     return std::string("A: ") + std::to_string(A.get_nrow()) + "x" + std::to_string(A.get_ncol()) +
@@ -160,14 +163,14 @@ std::ostream& operator<<(std::ostream& os, const Matrix& mat)
 //==============================================================================
 // calc_mult_flops ()
 //==============================================================================
-constexpr int calc_mult_flops(std::initializer_list<const Matrix> list)
+constexpr int calc_mult_flops(std::initializer_list<const Matrix> mats)
 {
-    if (list.size() == 0) {
+    if (mats.size() == 0) {
         return 0;
     }
 
-    Matrix res = *(list.begin());
-    for (auto it = list.begin() + 1; it != list.end(); it++) {
+    Matrix res = *(mats.begin());
+    for (auto it = mats.begin() + 1; it != mats.end(); it++) {
         res *= *it;
     }
 
