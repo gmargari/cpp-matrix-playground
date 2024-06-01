@@ -12,8 +12,6 @@ public:
 
     constexpr int get_nrow() const;
     constexpr int get_ncol() const;
-    constexpr int get_add_ops() const;
-    constexpr int get_mult_ops() const;
     constexpr int get_flops() const;
 
     constexpr Matrix operator+(const Matrix& other) const;
@@ -22,22 +20,36 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const Matrix& mat);
 
 private:
-    constexpr Matrix(int nrow, int ncol, int add_ops, int mult_ops);
+    constexpr Matrix(int nrow, int ncol, int flops);
 
     const int nrow;
     const int ncol;
-    const int add_ops;
-    const int mult_ops;
+    const int flops;
 };
+
+//==============================================================================
+// calc_mat_add_flops ()
+//==============================================================================
+static constexpr int calc_mat_add_flops(const Matrix& A, const Matrix& B)
+{
+    return (A.get_nrow() * B.get_ncol());
+}
+
+//==============================================================================
+// calc_mat_mult_flops ()
+//==============================================================================
+static constexpr int calc_mat_mult_flops(const Matrix& A, const Matrix& B)
+{
+    return (A.get_nrow() * A.get_ncol() * (2 * B.get_ncol() - 1));
+}
 
 //==============================================================================
 // Matrix ()
 //==============================================================================
-constexpr Matrix::Matrix(int nrow, int ncol, int add_ops, int mult_ops)
+constexpr Matrix::Matrix(int nrow, int ncol, int flops)
     : nrow(nrow),
       ncol(ncol),
-      add_ops(add_ops),
-      mult_ops(mult_ops)
+      flops(flops)
 {
 }
 
@@ -45,7 +57,7 @@ constexpr Matrix::Matrix(int nrow, int ncol, int add_ops, int mult_ops)
 // Matrix ()
 //==============================================================================
 constexpr Matrix::Matrix(int nrow, int ncol)
-    : Matrix(nrow, ncol, 0, 0)
+    : Matrix(nrow, ncol, 0)
 {
 }
 
@@ -66,27 +78,11 @@ constexpr int Matrix::get_ncol() const
 }
 
 //==============================================================================
-// get_add_ops ()
-//==============================================================================
-constexpr int Matrix::get_add_ops() const
-{
-    return add_ops;
-}
-
-//==============================================================================
-// get_mult_ops ()
-//==============================================================================
-constexpr int Matrix::get_mult_ops() const
-{
-    return mult_ops;
-}
-
-//==============================================================================
 // get_flops ()
 //==============================================================================
 constexpr int Matrix::get_flops() const
 {
-    return add_ops + mult_ops;
+    return flops;
 }
 
 //==============================================================================
@@ -102,8 +98,7 @@ constexpr Matrix Matrix::operator+(const Matrix& other) const
     return {
         this->nrow,
         this->ncol,
-        this->add_ops + other.add_ops + (this->nrow * this->ncol),
-        this->mult_ops + other.mult_ops
+        this->flops + other.flops + calc_mat_add_flops(*this, other)
     };
 }
 
@@ -120,8 +115,7 @@ constexpr Matrix Matrix::operator*(const Matrix& other) const
     return {
         this->nrow,
         other.ncol,
-        this->add_ops + other.add_ops + (this->nrow * this->ncol * (other.ncol - 1)),
-        this->mult_ops + other.mult_ops + (this->nrow * this->ncol * other.ncol),
+        this->flops + other.flops + calc_mat_mult_flops(*this, other)
     };
 }
 
@@ -130,7 +124,7 @@ constexpr Matrix Matrix::operator*(const Matrix& other) const
 //==============================================================================
 std::ostream& operator<<(std::ostream& os, const Matrix& mat)
 {
-    os << "<" << mat.get_nrow() << " x " << mat.get_ncol() << ", adds: " << mat.get_add_ops() << ", mults: " << mat.get_mult_ops() << ", flops: " << mat.get_flops() << ">";
+    os << "<dims: " << mat.get_nrow() << " x " << mat.get_ncol() << ", flops: " << mat.get_flops() << ">";
 
     return os;
 }
@@ -145,8 +139,6 @@ constexpr void compile_time_checks()
 
         static_assert(A.get_nrow() == 2);
         static_assert(A.get_ncol() == 10);
-        static_assert(A.get_add_ops() == 0);
-        static_assert(A.get_mult_ops() == 0);
         static_assert(A.get_flops() == 0);
     }
 
@@ -157,8 +149,6 @@ constexpr void compile_time_checks()
 
         static_assert(C.get_nrow() == 2);
         static_assert(C.get_ncol() == 10);
-        static_assert(C.get_add_ops() == 20);
-        static_assert(C.get_mult_ops() == 0);
         static_assert(C.get_flops() == 20);
     }
 
@@ -169,8 +159,6 @@ constexpr void compile_time_checks()
 
         static_assert(C.get_nrow() == 2);
         static_assert(C.get_ncol() == 10);
-        static_assert(C.get_add_ops() == 90);
-        static_assert(C.get_mult_ops() == 100);
         static_assert(C.get_flops() == 190);
     }
 
