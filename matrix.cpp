@@ -2,6 +2,27 @@
 #include <cassert>
 #include <ostream>
 #include <iostream>
+#include <vector>
+#include <limits>
+#include <string>
+using namespace std::literals::string_literals;
+
+//==============================================================================
+// for_each_adjacent_pair ()
+//==============================================================================
+template <typename Iter, typename Func>
+constexpr void for_each_adjacent_pair(Iter first, Iter last, Func func)
+{
+    if (first == last || std::next(first) == last) {
+        return;  // Not enough elements for pairs
+    }
+
+    auto it = first;
+    while (std::next(it) != last) {
+        func(*it, *std::next(it));
+        ++it;
+    }
+}
 
 //==============================================================================
 // Matrix
@@ -178,6 +199,69 @@ constexpr int calc_mult_flops(std::initializer_list<const Matrix> mats)
 }
 
 //==============================================================================
+// order_to_string ()
+//==============================================================================
+std::string order_to_string(std::vector<std::vector<int>>& min_index, int i, int j,
+                            std::initializer_list<const char *>& mat_names)
+{
+    if (i == j) {
+        return *(mat_names.begin() + i);
+    } else {
+        return "(" + order_to_string(min_index, i, min_index[i][j], mat_names) +
+        " x " + order_to_string(min_index, min_index[i][j] + 1, j, mat_names) + ")";
+    }
+}
+
+//==============================================================================
+// calc_optimal_mult_order ()
+//==============================================================================
+std::pair<std::string, int> calc_optimal_mult_order(std::initializer_list<const Matrix> mats,
+                                                    std::initializer_list<const char *> mat_names)
+{
+    //--------------------------------------------------------------------------
+    // Matrix Chain Multiplication
+    //--------------------------------------------------------------------------
+
+    if (mats.size() == 0) {
+        return {"", 0};
+    }
+
+    // assert mat dimensions are compatible
+    for_each_adjacent_pair(mats.begin(), mats.end(),
+        [](const Matrix& m1, const Matrix& m2) {
+            assert(m1.get_ncol() == m2.get_nrow());
+        }
+    );
+
+    const auto get_mat = [&mats](int i) { return *(mats.begin() + i); };
+    const std::size_t n = mats.size();
+    std::vector<std::vector<int>> min_cost(n, std::vector<int>(n));
+    std::vector<std::vector<int>> min_index(n, std::vector<int>(n));
+    for (std::size_t length = 2; length < n + 1; length++) {
+        // find minimum flops for all chains of size 'length'
+        for (std::size_t i = 0; i < n - length + 1; i++) {
+            const std::size_t j = i + length - 1;
+
+            min_cost[i][j] = std::numeric_limits<int>::max();
+            for (std::size_t k = i; k < j; k++) {
+                const int cost = min_cost[i][k] + min_cost[k + 1][j] +
+                    // flops(dim1, dim2, dim3) = dim1 * dim2 * (2 * dim3 - 1)
+                    get_mat(i).get_nrow() * get_mat(k).get_ncol() * (2 * get_mat(j).get_ncol() - 1);
+                if (cost < min_cost[i][j]) {
+                    min_cost[i][j] = cost;
+                    min_index[i][j] = k;
+                }
+            }
+        }
+    }
+
+    const std::string& opt_order = order_to_string(min_index, 0, n - 1, mat_names);
+    const int opt_flops = min_cost[0][n - 1];
+
+    return {opt_order, opt_flops};
+}
+
+//==============================================================================
 // compile_time_checks ()
 //==============================================================================
 constexpr void compile_time_checks()
@@ -281,6 +365,16 @@ void run_time_checks()
         assert(C.get_nrow() == 10);
         assert(C.get_ncol() == 10);
         assert(C.get_flops() == 570);
+    }
+
+    {
+        constexpr Matrix A(40, 20);
+        constexpr Matrix B(20, 30);
+        constexpr Matrix C(30, 10);
+        constexpr Matrix D(10, 30);
+
+        assert(calc_optimal_mult_order({A, B, C, D}, {"A", "B", "C", "D"}) ==
+               std::make_pair("((A x (B x C)) x D)"s, 50200));
     }
 }
 
