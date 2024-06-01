@@ -16,8 +16,8 @@ public:
 
     constexpr Matrix operator+(const Matrix& other) const;
     constexpr Matrix operator*(const Matrix& other) const;
-    Matrix& operator+=(const Matrix& other);
-    Matrix& operator*=(const Matrix& other);
+    constexpr Matrix& operator+=(const Matrix& other);
+    constexpr Matrix& operator*=(const Matrix& other);
 
     friend std::ostream& operator<<(std::ostream& os, const Matrix& mat);
 
@@ -130,7 +130,7 @@ constexpr Matrix Matrix::operator*(const Matrix& other) const
 //==============================================================================
 // operator+= ()
 //==============================================================================
-Matrix& Matrix::operator+=(const Matrix& other)
+constexpr Matrix& Matrix::operator+=(const Matrix& other)
 {
     *this = this->operator+(other);
 
@@ -140,7 +140,7 @@ Matrix& Matrix::operator+=(const Matrix& other)
 //==============================================================================
 // operator*= ()
 //==============================================================================
-Matrix& Matrix::operator*=(const Matrix& other)
+constexpr Matrix& Matrix::operator*=(const Matrix& other)
 {
     *this = this->operator*(other);
 
