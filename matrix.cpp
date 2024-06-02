@@ -208,7 +208,7 @@ std::string order_to_string(std::vector<std::vector<int>>& min_index, int i, int
         return *(mat_names.begin() + i);
     } else {
         return "(" + order_to_string(min_index, i, min_index[i][j], mat_names) +
-        " x " + order_to_string(min_index, min_index[i][j] + 1, j, mat_names) + ")";
+        " * " + order_to_string(min_index, min_index[i][j] + 1, j, mat_names) + ")";
     }
 }
 
@@ -378,7 +378,7 @@ void run_time_checks()
         constexpr Matrix D(10, 30);
 
         assert(calc_optimal_mult_order({A, B, C, D}, {"A", "B", "C", "D"}) ==
-               std::make_pair("((A x (B x C)) x D)"s, 50200));
+               std::make_pair("((A * (B * C)) * D)"s, 50200));
     }
 }
 
