@@ -39,7 +39,7 @@ public:
     constexpr Matrix operator*(const Matrix& other) const;
     constexpr Matrix& operator+=(const Matrix& other);
     constexpr Matrix& operator*=(const Matrix& other);
-    constexpr bool operator==(const Matrix& other);
+    constexpr bool operator==(const Matrix& other) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Matrix& mat);
 
@@ -175,7 +175,7 @@ constexpr Matrix& Matrix::operator*=(const Matrix& other)
 //==============================================================================
 // operator== ()
 //==============================================================================
-constexpr bool Matrix::operator==(const Matrix& other)
+constexpr bool Matrix::operator==(const Matrix& other) const
 {
     return (this->m_nrow == other.m_nrow &&
             this->m_ncol == other.m_ncol &&
