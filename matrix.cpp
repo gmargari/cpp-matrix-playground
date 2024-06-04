@@ -228,6 +228,26 @@ constexpr Matrix product_using_initializer_list(std::initializer_list<const Matr
 }
 
 //==============================================================================
+// sum_using_fold_expression ()
+//==============================================================================
+template <typename... Args>
+static constexpr Matrix sum_using_fold_expression(Args&&... args)
+{
+    return (... + args);  // ((arg1 + arg2) + arg3) + ...
+//    return (args + ...);  // arg1 + (arg2 + (arg3 + ...))
+}
+
+//==============================================================================
+// product_using_fold_expression ()
+//==============================================================================
+template <typename... Args>
+static constexpr Matrix product_using_fold_expression(Args&&... args)
+{
+    return (... * args);  // ((arg1 * arg2) * arg3) * ...
+//    return (args * ...);  // arg1 * (arg2 * (arg3 * ...))
+}
+
+//==============================================================================
 // order_to_string ()
 //==============================================================================
 std::string order_to_string(std::vector<std::vector<int>>& min_index, int i, int j,
@@ -354,6 +374,7 @@ constexpr void compile_time_checks()
         constexpr Matrix C(2, 5);
 
         static_assert((A + B + C) == sum_using_initializer_list({A, B, C}));
+        static_assert((A + B + C) == sum_using_fold_expression(A, B, C));
     }
 
     {
@@ -363,6 +384,7 @@ constexpr void compile_time_checks()
         constexpr Matrix D(3, 8);
 
         static_assert((A * B * C * D) == product_using_initializer_list({A, B, C, D}));
+        static_assert((A * B * C * D) == product_using_fold_expression(A, B, C, D));
     }
 }
 
