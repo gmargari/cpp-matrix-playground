@@ -193,12 +193,12 @@ std::ostream& operator<<(std::ostream& os, const Matrix& mat)
 }
 
 //==============================================================================
-// calc_mult_flops ()
+// product_using_initializer_list ()
 //==============================================================================
-constexpr int calc_mult_flops(std::initializer_list<const Matrix> mats)
+constexpr Matrix product_using_initializer_list(std::initializer_list<const Matrix> mats)
 {
     if (mats.size() == 0) {
-        return 0;
+        throw std::logic_error("no input mat");
     }
 
     Matrix res = *(mats.begin());
@@ -206,7 +206,7 @@ constexpr int calc_mult_flops(std::initializer_list<const Matrix> mats)
         res *= *it;
     }
 
-    return res.get_flops();
+    return res;
 }
 
 //==============================================================================
@@ -331,7 +331,7 @@ constexpr void compile_time_checks()
         constexpr Matrix C(10, 3);
         constexpr Matrix D(3, 8);
 
-        static_assert((A * B * C * D).get_flops() == calc_mult_flops({A, B, C, D}));
+        static_assert((A * B * C * D) == product_using_initializer_list({A, B, C, D}));
     }
 }
 
