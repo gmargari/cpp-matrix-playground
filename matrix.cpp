@@ -457,10 +457,62 @@ int main()
     compile_time_checks();
     run_time_checks();
 
-    Matrix A(2, 5);
-    Matrix B(5, 3);
-    Matrix C(3, 10);
+    {
+        constexpr Matrix A(2, 5);
+        constexpr Matrix B(5, 3);
+        constexpr Matrix C(3, 10);
 
-    std::cout << "(A * B) * C: " << (A * B) * C << '\n';
-    std::cout << "A * (B * C): " << A * (B * C) << '\n';
+        std::cout << "(A * B) * C: " << (A * B) * C << '\n';
+        std::cout << "A * (B * C): " << A * (B * C) << '\n';
+    }
+
+    {
+        constexpr Matrix A(40, 20);
+        constexpr Matrix B(20, 30);
+        constexpr Matrix C(30, 10);
+        constexpr Matrix D(10, 30);
+
+        const auto& empty_opt = calc_optimal_mult_order({}, {});
+
+        printf("optimum order:\n");
+        printf("%s: %10d\n", empty_opt.first.c_str(), empty_opt.second);
+        printf("\n");
+
+        const auto& A_opt = calc_optimal_mult_order({A}, {"A"});
+
+        printf("optimum order:\n");
+        printf("  %s: %10d\n", A_opt.first.c_str(), A_opt.second);
+        printf("all:\n");
+        printf("  A: %10d\n", (A).get_flops());
+        printf("\n");
+
+        const auto& AB_opt = calc_optimal_mult_order({A, B}, {"A", "B"});
+
+        printf("optimum order:\n");
+        printf("  %s: %10d\n", AB_opt.first.c_str(), AB_opt.second);
+        printf("all:\n");
+        printf("  (A * B): %10d\n", (A * B).get_flops());
+        printf("\n");
+
+        const auto& ABC_opt = calc_optimal_mult_order({A, B, C}, {"A", "B", "C"});
+
+        printf("optimum order:\n");
+        printf("  %s: %10d\n", ABC_opt.first.c_str(), ABC_opt.second);
+        printf("all:\n");
+        printf("  ((A * B) * C): %10d\n", ((A * B) * C).get_flops());
+        printf("  (A * (B * C)): %10d\n", (A * (B * C)).get_flops());
+        printf("\n");
+
+        const auto& ABCD_opt = calc_optimal_mult_order({A, B, C, D}, {"A", "B", "C", "D"});
+
+        printf("optimum order:\n");
+        printf("  %s: %10d\n", ABCD_opt.first.c_str(), ABCD_opt.second);
+        printf("all:\n");
+        printf("  (((A * B) * C) * D): %10d\n", (((A * B) * C) * D).get_flops());
+        printf("  ((A * B) * (C * D)): %10d\n", ((A * B) * (C * D)).get_flops());
+        printf("  ((A * (B * C)) * D): %10d\n", ((A * (B * C)) * D).get_flops());
+        printf("  (A * ((B * C) * D)): %10d\n", (A * ((B * C) * D)).get_flops());
+        printf("  (A * (B * (C * D))): %10d\n", (A * (B * (C * D))).get_flops());
+        printf("\n");
+   }
 }
