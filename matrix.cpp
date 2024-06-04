@@ -193,6 +193,24 @@ std::ostream& operator<<(std::ostream& os, const Matrix& mat)
 }
 
 //==============================================================================
+// sum_using_initializer_list ()
+//==============================================================================
+constexpr Matrix sum_using_initializer_list(std::initializer_list<const Matrix> mats)
+{
+    // static_assert
+    if (mats.size() == 0) {
+        throw std::logic_error("no input mat");
+    }
+
+    Matrix res = *(mats.begin());
+    for (auto it = mats.begin() + 1; it != mats.end(); it++) {
+        res += *it;
+    }
+
+    return res;
+}
+
+//==============================================================================
 // product_using_initializer_list ()
 //==============================================================================
 constexpr Matrix product_using_initializer_list(std::initializer_list<const Matrix> mats)
@@ -328,6 +346,14 @@ constexpr void compile_time_checks()
         static_assert(G.get_ncol() == 8);
         static_assert(G2.get_nrow() == 2);
         static_assert(G2.get_ncol() == 8);
+    }
+
+    {
+        constexpr Matrix A(2, 5);
+        constexpr Matrix B(2, 5);
+        constexpr Matrix C(2, 5);
+
+        static_assert((A + B + C) == sum_using_initializer_list({A, B, C}));
     }
 
     {
