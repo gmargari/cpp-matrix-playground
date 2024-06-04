@@ -216,7 +216,7 @@ std::string order_to_string(std::vector<std::vector<int>>& min_index, int i, int
                             std::initializer_list<const char *>& mat_names)
 {
     if (i == j) {
-        return *(mat_names.begin() + i);
+        return (mat_names.size() ? *(mat_names.begin() + i) : std::string("M") + std::to_string(i + 1));
     } else {
         return "(" + order_to_string(min_index, i, min_index[i][j], mat_names) +
         " * " + order_to_string(min_index, min_index[i][j] + 1, j, mat_names) + ")";
@@ -227,11 +227,16 @@ std::string order_to_string(std::vector<std::vector<int>>& min_index, int i, int
 // calc_optimal_mult_order ()
 //==============================================================================
 std::pair<std::string, int> calc_optimal_mult_order(std::initializer_list<const Matrix> mats,
-                                                    std::initializer_list<const char *> mat_names)
+                                                    std::initializer_list<const char *> mat_names = {})
 {
     //--------------------------------------------------------------------------
     // Matrix Chain Multiplication
     //--------------------------------------------------------------------------
+
+    // static_assert
+    if (mat_names.size() && mat_names.size() != mats.size()) {
+        throw std::logic_error("wrong input sizes");
+    }
 
     if (mats.size() == 0) {
         return {"", 0};
@@ -388,6 +393,9 @@ void run_time_checks()
         constexpr Matrix C(30, 10);
         constexpr Matrix D(10, 30);
 
+        // when no mat names given, mats are named as "Mi"
+        assert(calc_optimal_mult_order({A, B, C, D}) ==
+               std::make_pair("((M1 * (M2 * M3)) * M4)"s, 50200));
         assert(calc_optimal_mult_order({A, B, C, D}, {"A", "B", "C", "D"}) ==
                std::make_pair("((A * (B * C)) * D)"s, 50200));
     }
